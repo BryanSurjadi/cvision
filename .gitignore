@@ -1,0 +1,16 @@
+# Dependency
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# Build output
+dist/
+
+# Uploads (mounted as Docker volume)
+app-be/uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
