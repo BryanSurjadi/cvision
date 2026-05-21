@@ -9,7 +9,8 @@ node_modules/
 dist/
 
 # Uploads (mounted as Docker volume)
-app-be/uploads/
+app-be/uploads/*
+!app-be/uploads/.gitkeep
 
 # OS files
 .DS_Store
