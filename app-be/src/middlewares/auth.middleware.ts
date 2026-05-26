@@ -12,7 +12,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
 
     const token = authHeader.split(' ')[1]
     const payload = verifyAccessToken(token)
-    req.user = payload
+    ;(req as any).user = payload
     next()
   } catch (error) {
     res.status(401).json({ success: false, message: 'Invalid or expired token' })
