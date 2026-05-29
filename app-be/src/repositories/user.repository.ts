@@ -33,6 +33,10 @@ export const userRepository = {
     })
   },
 
+  findByRole: async (role: Role) => {
+    return prisma.user.findFirst({ where: { role } })
+  },
+
   deactivate: async (id: string) => {
     return prisma.user.update({
       where: { id },

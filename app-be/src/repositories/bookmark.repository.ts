@@ -29,11 +29,8 @@ export const bookmarkRepository = {
     })
   },
 
-  exists: async (data: {
-    hrId: string
-    submissionId: string
-  }) => {
-    const bookmark =  prisma.bookmark.findFirst({where: { ...data }})
+  exists: async (hrId: string,submissionId: string) => {
+    const bookmark =  prisma.bookmark.findFirst({where: { hrId, submissionId }})
     return !!bookmark
   }
 
