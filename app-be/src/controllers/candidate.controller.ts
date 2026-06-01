@@ -32,8 +32,8 @@ export const candidateController = {
 
   getProfile: async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params as { id: string }
-      const result = await candidateService.getProfile(id)
+      const { submissionId } = req.params as { submissionId: string }
+      const result = await candidateService.getProfile(submissionId)
       res.status(200).json({ success: true, message: 'Candidate profile fetched successfully', data: result })
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message })

@@ -31,7 +31,7 @@ export const bookmarkRepository = {
 
   exists: async (hrId: string,submissionId: string) => {
     const bookmark =  prisma.bookmark.findFirst({where: { hrId, submissionId }})
-    return !!bookmark
+    return bookmark
   }
 
 } 
