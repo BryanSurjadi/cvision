@@ -1,4 +1,3 @@
-// DI CLAUDE MASI ADA BLM DI BACA DAN DI COPY
 import { transporter } from '../config/nodemailer'
 import { env } from '../config/env'
 

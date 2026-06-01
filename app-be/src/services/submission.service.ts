@@ -4,6 +4,8 @@ import { notificationRepository } from "../repositories/notification.repository"
 import { extractTextFromPDF } from "../utils/pdf-parser";
 import { sseManager } from "../utils/sse-manager";
 import { userRepository } from "../repositories/user.repository";
+import fs from "fs";
+
 
 export const submissionService = {
   submit: async (data: {
@@ -12,7 +14,11 @@ export const submissionService = {
     cvFilename: string
     cvPath: string
   }) => {
+    console.log('CV Path:', data.cvPath)
+    console.log('File exists:', fs.existsSync(data.cvPath))
+    
     const cvText = await extractTextFromPDF(data.cvPath)
+    console.log('CV Text length:', cvText.length)
 
     if(!cvText || cvText.trim().length === 0) {
       throw new Error('CV text is empty or not found')
