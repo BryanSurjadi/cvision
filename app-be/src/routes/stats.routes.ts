@@ -5,6 +5,6 @@ import { authorize } from '../middlewares/role.middleware'
 
 const router = Router()
 
-router.get('/', authenticate, authorize('admin'), statsController.get)
+router.get('/', authenticate, authorize('admin', 'hr', 'candidate'), statsController.get)
 
 export default router

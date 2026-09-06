@@ -3,19 +3,24 @@ import { userRepository } from "../repositories/user.repository";
 import { hashPassword, comparePassword } from "../utils/bcrypt";
 import { generateAccessToken,generateRefreshToken } from "../utils/jwt";
 import { Role } from "@prisma/client";
-import { is } from "zod/locales";
-import { isAborted } from "zod/v3";
-import { create } from "node:domain";
 
 export const authService = {
-  register: async (data: {name: string, email: string, password: string}) => {
+  register: async (data: {name: string, email: string, password: string, role?: string, company?: string, jobTitle?: string}) => {
     const existing = await userRepository.findByEmail(data.email)
     if (existing) {
       throw new Error('User already exists')
     }
 
     const hashed= await hashPassword(data.password)
-    const user = await userRepository.create({...data, password: hashed, role: Role.candidate})
+    const userRole = data.role === 'hr' ? Role.hr : Role.candidate
+    const user = await userRepository.create({
+      name: data.name,
+      email: data.email,
+      password: hashed,
+      role: userRole,
+      company: userRole === Role.hr ? data.company : undefined,
+      jobTitle: userRole === Role.hr ? data.jobTitle : undefined,
+    })
 
     const payload = { userId: user.id, role: user.role }
     const accessToken = generateAccessToken(payload)
@@ -27,7 +32,9 @@ export const authService = {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
+      company: user.company,
+      jobTitle: user.jobTitle
     }}
   },
 
@@ -89,5 +96,15 @@ export const authService = {
       isActive: user.isActive,
       createdAt: user.createdAt
     }
+  },
+  changePassword: async (userId: string, currentPassword: string, newPassword: string) => {
+    const user = await userRepository.findById(userId)
+    if (!user) throw new Error('User not found')
+
+    const isValid = await comparePassword(currentPassword, user.password)
+    if (!isValid) throw new Error('Current password is incorrect')
+
+    const hashed = await hashPassword(newPassword)
+    await userRepository.updatePassword(userId, hashed)
   }
 }

@@ -15,6 +15,8 @@ export const userRepository = {
     email: string
     password: string
     role: Role
+    company?: string
+    jobTitle?: string
   }) => {
     return prisma.user.create({ data })
   },
@@ -28,6 +30,8 @@ export const userRepository = {
         role: true,
         isActive: true,
         createdAt: true,
+        company: true,
+        jobTitle: true,
         password: false
       }
     })
@@ -41,6 +45,20 @@ export const userRepository = {
     return prisma.user.update({
       where: { id },
       data: { isActive: false }
+    })
+  },
+
+  reactivate: async (id: string) => {
+    return prisma.user.update({
+      where: { id },
+      data: { isActive: true }
+    })
+  },
+  
+  updatePassword: async (id: string, password: string) => {
+    return prisma.user.update({
+      where: { id },
+      data: { password }
     })
   }
 }

@@ -38,6 +38,8 @@ model User {
   email     String   @unique
   password  String
   role      Role
+  company   String?  @db.VarChar(255) 
+  jobTitle  String?  @map("job_title") @db.VarChar(255) 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

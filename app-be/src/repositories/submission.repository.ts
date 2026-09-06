@@ -103,5 +103,22 @@ export const submissionRepository = {
     ])
 
     return { data, total }
+  },
+
+  getCandidateStats: async (candidateId: string) => {
+    const [total, verified, analysis] = await Promise.all([
+      prisma.submission.count({ where: { candidateId } }),
+      prisma.submission.count({ where: { candidateId, status: 'verified' } }),
+      prisma.analysisResult.aggregate({
+        where: { submission: { candidateId } },
+        _avg: { atsScore: true }
+      })
+    ])
+
+    return {
+      total,
+      verified,
+      avgAtsScore: Math.round(analysis._avg.atsScore || 0)
+    }
   }
 }

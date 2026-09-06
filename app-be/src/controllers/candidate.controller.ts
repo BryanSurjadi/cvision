@@ -40,5 +40,24 @@ export const candidateController = {
     }
   },
 
+  downloadCv: async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { submissionId } = req.params as { submissionId: string }
+    const submission = await candidateService.getProfile(submissionId)
+    const path = require('path')
+    const fs = require('fs')
+    const filePath = path.resolve(submission.cvPath)
+
+    if (!fs.existsSync(filePath)) {
+      res.status(404).json({ success: false, message: 'CV file not found' })
+      return
+    }
+
+    res.download(filePath, submission.cvFilename)
+  } catch (error: any) {
+    res.status(400).json({ success: false, message: error.message })
+  }
+}
+
 
 }

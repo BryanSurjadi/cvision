@@ -1,4 +1,6 @@
 import { notificationRepository } from '../repositories/notification.repository'
+import { sseManager } from '../utils/sse-manager'
+import { NotificationType } from '@prisma/client'
 
 export const notificationService = {
   getAll: async (userId: string) => {
@@ -11,5 +13,6 @@ export const notificationService = {
 
   getUnreadCount: async (userId: string) => {
     return notificationRepository.countUnread(userId)
-  }
+  },
+
 }

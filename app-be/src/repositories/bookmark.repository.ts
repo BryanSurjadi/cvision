@@ -32,6 +32,10 @@ export const bookmarkRepository = {
   exists: async (hrId: string,submissionId: string) => {
     const bookmark =  prisma.bookmark.findFirst({where: { hrId, submissionId }})
     return bookmark
+  },
+
+  countByHr: async (hrId: string) => {
+    return prisma.bookmark.count({ where: { hrId } })
   }
 
 } 
