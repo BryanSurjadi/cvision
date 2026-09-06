@@ -36,6 +36,7 @@ export interface AnalysisResult {
   extractedEducation: Education[]
   strengths: string[]
   weaknesses: string[]
+  recommendedRoles: string[]
   recommendation: string
   analyzedAt: string
 }

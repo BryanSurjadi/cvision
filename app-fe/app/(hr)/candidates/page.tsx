@@ -18,15 +18,26 @@ export default function HRCandidatesPage() {
   const [candidates, setCandidates] = useState<Submission[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [experienceLevel, setExperienceLevel] = useState('')
+  const [minScore, setMinScore] = useState('')
+  const [maxScore, setMaxScore] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
   const [bookmarked, setBookmarked] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
-  const fetchCandidates = async (role = '', p = 1) => {
+  const fetchCandidates = async ( p = 1) => {
     setLoading(true)
     try {
       const res = await api.get('/candidates', {
-        params: { role, page: p, limit: 10 }
+        params: {
+          role: search || undefined,
+          experienceLevel: experienceLevel || undefined,
+          minScore: minScore ? Number(minScore) : undefined,
+          maxScore: maxScore ? Number(maxScore) : undefined,
+          page: p,
+          limit: 10
+        }
       })
       setCandidates(res.data.data)
       setTotalPages(res.data.pagination?.totalPages || 1)
@@ -57,7 +68,16 @@ export default function HRCandidatesPage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     setPage(1)
-    fetchCandidates(search, 1)
+    fetchCandidates(1)
+  }
+
+  const handleReset = () => {
+    setSearch('')
+    setExperienceLevel('')
+    setMinScore('')
+    setMaxScore('')
+    setPage(1)
+    fetchCandidates(1)
   }
 
   const toggleBookmark = async (submissionId: string) => {
@@ -93,7 +113,7 @@ export default function HRCandidatesPage() {
   return (
     <ProtectedRoute allowedRoles={['hr']}>
       <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-        <div className="max-w-5xl mx-auto px-6 py-12">
+        <div className="max-w-6xl mx-auto py-12">
 
           {/* Header */}
           <div className="flex items-start justify-between mb-8">
@@ -105,19 +125,103 @@ export default function HRCandidatesPage() {
             </div>
           </div>
 
-          {/* Search */}
-          <form onSubmit={handleSearch} className="flex gap-3 mb-8">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by role e.g. Backend Developer"
-              className="input"
-            />
-            <button type="submit" className="btn-primary px-6 shrink-0">
-              Search
-            </button>
-          </form>
+          {/* Search + Filters */}
+          <div className="mb-8">
+            <form onSubmit={handleSearch} className="flex gap-3 mb-3">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by role, e.g. Backend Developer"
+                className="input"
+              />
+              <button
+                type="button"
+                onClick={() => setShowFilters(!showFilters)}
+                className="btn-secondary px-4 shrink-0 flex items-center gap-2"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+                </svg>
+                Filters
+                {(experienceLevel || minScore || maxScore) && (
+                  <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ background: 'var(--brand)' }}
+                  />
+                )}
+              </button>
+              <button type="submit" className="btn-primary px-6 shrink-0">
+                Search
+              </button>
+            </form>
+
+            {/* Filter panel */}
+            {showFilters && (
+              <div
+                className="rounded-xl p-4 grid grid-cols-3 gap-4"
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)'
+                }}
+              >
+                {/* Experience level */}
+                <div>
+                  <label className="label">Experience Level</label>
+                  <select
+                    value={experienceLevel}
+                    onChange={(e) => setExperienceLevel(e.target.value)}
+                    className="input"
+                  >
+                    <option value="">All levels</option>
+                    <option value="fresh_graduate">Fresh Graduate</option>
+                    <option value="junior">Junior</option>
+                    <option value="mid">Mid</option>
+                    <option value="senior">Senior</option>
+                  </select>
+                </div>
+
+                {/* Min score */}
+                <div>
+                  <label className="label">Min ATS Score</label>
+                  <input
+                    type="number"
+                    value={minScore}
+                    onChange={(e) => setMinScore(e.target.value)}
+                    placeholder="e.g. 60"
+                    min={0}
+                    max={100}
+                    className="input"
+                  />
+                </div>
+
+                {/* Max score */}
+                <div>
+                  <label className="label">Max ATS Score</label>
+                  <input
+                    type="number"
+                    value={maxScore}
+                    onChange={(e) => setMaxScore(e.target.value)}
+                    placeholder="e.g. 100"
+                    min={0}
+                    max={100}
+                    className="input"
+                  />
+                </div>
+
+                {/* Reset */}
+                <div className="col-span-3 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="btn-secondary text-xs px-3 py-1.5"
+                  >
+                    Reset filters
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Results */}
           {loading ? (
@@ -277,17 +381,14 @@ export default function HRCandidatesPage() {
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2">
                   <button
-                    onClick={() => { setPage(p => p - 1); fetchCandidates(search, page - 1) }}
+                    onClick={() => { setPage(p => p - 1); fetchCandidates(page - 1) }}
                     disabled={page === 1}
                     className="btn-secondary px-4 py-1.5 text-xs disabled:opacity-40"
                   >
                     ← Prev
                   </button>
-                  <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                    Page {page} of {totalPages}
-                  </span>
                   <button
-                    onClick={() => { setPage(p => p + 1); fetchCandidates(search, page + 1) }}
+                    onClick={() => { setPage(p => p + 1); fetchCandidates(page + 1) }}
                     disabled={page === totalPages}
                     className="btn-secondary px-4 py-1.5 text-xs disabled:opacity-40"
                   >

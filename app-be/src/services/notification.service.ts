@@ -15,4 +15,22 @@ export const notificationService = {
     return notificationRepository.countUnread(userId)
   },
 
+  
+  notifyUser: async (data: {
+    userId: string
+    submissionId?: string
+    type: NotificationType
+    message: string
+  }) => {
+    // 1. Save to DB so it persists on the Notifications Page
+    const notification = await notificationRepository.create(data)
+
+    // 2. Push live over SSE if user is online
+    sseManager.emit(data.userId, {
+      type: 'NOTIFICATION_RECEIVED',
+      data: notification
+    })
+
+    return notification
+  }
 }

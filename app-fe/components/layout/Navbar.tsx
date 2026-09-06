@@ -5,6 +5,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/context/AuthContext'
+import { usePathname } from 'next/navigation'
+
 
 const navLinks = {
   candidate: [
@@ -29,6 +31,8 @@ export default function Navbar() {
   const { user, logout } = useAuth()
   const router = useRouter()
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const pathname = usePathname()
+
 
   const links = user ? navLinks[user.role] : []
 
@@ -48,18 +52,24 @@ export default function Navbar() {
 
         {user && (
           <div className="flex items-center gap-6">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm transition-colors"
-                style={{ color: 'var(--text-secondary)' }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {links.map((link) => {
+              const isActive = pathname === link.href || pathname.startsWith(link.href + '/')
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm transition-colors relative"
+                  style={{
+                    color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    fontWeight: isActive ? 600 : 400,
+                    borderBottom: isActive ? '2px solid var(--brand)' : '2px solid transparent',
+                    paddingBottom: '2px'
+                  }}
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
           </div>
         )}
 

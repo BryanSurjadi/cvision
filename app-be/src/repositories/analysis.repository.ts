@@ -12,6 +12,7 @@ export const analysisRepository = {
     extractedEducation: any
     strengths: any
     weaknesses: any
+    recommendedRoles: any
     recommendation: string
   }) => {
     return prisma.analysisResult.create({data})

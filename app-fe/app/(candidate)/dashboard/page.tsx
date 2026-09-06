@@ -6,6 +6,7 @@ import api from "@/lib/axios"
 import { Submission } from "@/types"
 import Link from "next/link"
 import { useAuth } from '@/lib/context/AuthContext'
+import { useRouter } from 'next/navigation'
 
 
 const scoreBand = (score: number) => {
@@ -16,6 +17,7 @@ const scoreBand = (score: number) => {
 }
 
 export default function DashboardPage () {
+  const router = useRouter()
   const { user } = useAuth()
   const [submissions, setSubmissions] = useState<Submission[]>([])
   const [loading, setLoading] = useState(true)
@@ -45,12 +47,11 @@ export default function DashboardPage () {
               <h1 className="text-2xl font-bold text-gray-900">My Submissions</h1>
               <p className="text-gray-500 mt-1">Track your CV submissions and their status</p>
             </div>
-            <Link
-              href="/submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md text-sm transition-colors"
-            >
+            <button
+              onClick = {() => router.push('/submit')}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md text-sm transition-colors">
               Submit New CV
-            </Link>
+            </button>
           </div>
 
           {loading ? (
@@ -60,9 +61,9 @@ export default function DashboardPage () {
               <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
                 You haven&apos;t submitted any CVs yet.
               </p>
-              <link href='/submit' className="btn-primary">
+              <button onClick = {() => router.push('/submit')} className="btn-primary">
                 Submit your first CV
-              </link>
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
@@ -74,9 +75,9 @@ export default function DashboardPage () {
                 const offset = score !== undefined ? circ - (score / 100) * circ : circ
 
                 return (
-                  <Link
+                  <button
                     key={sub.id}
-                    href={`/submission/${sub.id}`}
+                    onClick = {() => router.push('/submission/' + sub.id)}
                     className="rounded-xl p-5 transition-all"
                     style={{
                       background: 'var(--surface)',
@@ -86,11 +87,11 @@ export default function DashboardPage () {
                     onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
                   >
                     {/* Top row — avatar + name + score ring */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-3 h-full">
                         {/* Avatar initials */}
                         <div
-                          className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold text-white shrink-0"
+                          className="w-14 h-14 rounded-lg flex items-center justify-center text-sm font-semibold text-white shrink-0"
                           style={{ background: 'var(--brand)' }}
                         >
                           {user?.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
@@ -99,7 +100,7 @@ export default function DashboardPage () {
                           <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>
                             {sub.targetRole}
                           </p>
-                          <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                          <p className="justify-self-start text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
                             {new Date(sub.submittedAt).toLocaleDateString('en-US', {
                               year: 'numeric', month: 'short', day: 'numeric'
                             })}
@@ -135,7 +136,7 @@ export default function DashboardPage () {
                     {/* Summary */}
                     {sub.analysisResult?.overallSummary && (
                       <p
-                        className="text-xs leading-relaxed mb-4 line-clamp-2"
+                        className="text-xs leading-relaxed mb-4 line-clamp-2  text-left"
                         style={{ color: 'var(--text-secondary)' }}
                       >
                         {sub.analysisResult.overallSummary}
@@ -177,7 +178,7 @@ export default function DashboardPage () {
                       </span>
                     </div>
 
-                  </Link>
+                  </button>
                 )
               })}
             </div>

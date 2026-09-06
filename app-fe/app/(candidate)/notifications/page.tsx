@@ -5,6 +5,7 @@ import ProtectedRoute from '@/components/layout/ProtectedRoute'
 import api from '@/lib/axios'
 import { Notification } from '@/types'
 import { useRouter } from 'next/navigation'
+import Cookies from 'js-cookie'
 
 export default function NotificationsPage() {
   const router = useRouter()
@@ -12,17 +13,60 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let isSubscribed = true
+
+    // Read accessToken from cookies!
+    const token = Cookies.get('accessToken')
+
+    if (!token) {
+      console.error('No accessToken found in Cookies')
+      return
+    }
+
+    // 1. Initial HTTP Fetch
     const fetchNotifications = async () => {
       try {
         const res = await api.get('/notifications')
-        setNotifications(res.data.data)
+        if (isSubscribed) setNotifications(res.data.data)
       } catch (err) {
-        console.error(err)
+        console.error('Failed to fetch notifications:', err)
       } finally {
-        setLoading(false)
+        if (isSubscribed) setLoading(false)
       }
     }
+
     fetchNotifications()
+
+    // 2. Establish SSE Connection passing cookie token
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'
+    const eventSource = new EventSource(`${backendUrl}/notifications/stream?token=${token}`)
+
+    eventSource.onopen = () => {
+      if (isSubscribed) console.log('SSE Stream Connected')
+    }
+
+    eventSource.onmessage = (event) => {
+      try {
+        const parsed = JSON.parse(event.data)
+        if (parsed.type === 'NOTIFICATION_RECEIVED' && isSubscribed) {
+          setNotifications((prev) => [parsed.data, ...prev])
+        }
+      } catch (err) {
+        console.error('Failed to parse SSE payload', err)
+      }
+    }
+
+    eventSource.onerror = () => {
+      if (isSubscribed && eventSource.readyState === EventSource.CLOSED) {
+        console.warn('SSE Stream disconnected')
+      }
+    }
+
+    return () => {
+      isSubscribed = false
+      eventSource.close()
+    }
+    
   }, [])
 
   const markAsRead = async (id: string) => {

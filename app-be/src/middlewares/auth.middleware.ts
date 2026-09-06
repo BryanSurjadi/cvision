@@ -3,14 +3,23 @@ import { verifyAccessToken } from '../utils/jwt'
 
 export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
   try {
-    const authHeader = req.headers.authorization
+    let token: string | undefined
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const authHeader = req.headers.authorization
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.split(' ')[1]
+    } else if (req.query.token) {
+      token = req.query.token as string
+    } else if (req.cookies?.accessToken) {
+      token = req.cookies.accessToken
+    }
+
+    // 3. Reject if neither is present
+    if (!token || token === 'null' || token === 'undefined') {
       res.status(401).json({ success: false, message: 'No token provided' })
       return
     }
 
-    const token = authHeader.split(' ')[1]
     const payload = verifyAccessToken(token)
     ;(req as any).user = payload
     next()

@@ -67,7 +67,7 @@ export default function SavedPage() {
   return (
     <ProtectedRoute allowedRoles={['hr']}>
       <div className="min-h-screen" style={{ background: 'var(--background)' }}>
-        <div className="max-w-5xl mx-auto px-6 py-12">
+        <div className="max-w-6xl mx-auto py-12">
 
           <div className="mb-8">
             <p className="section-label">HR</p>

@@ -34,19 +34,31 @@ export const notificationController = {
   stream: async (req: Request, res: Response): Promise<void> => {
     const userId = (req as any).user.userId
 
-    res.setHeader('Content-Type', 'text/event-stream')
-    res.setHeader('Cache-Control', 'no-cache')
-    res.setHeader('Connection', 'keep-alive')
-    res.flushHeaders()
+    // Prevent Node HTTP socket timeout
+    req.socket.setTimeout(0)
+    req.socket.setNoDelay(true)
+    req.socket.setKeepAlive(true)
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no' // Prevents Nginx/reverse proxy buffering
+    })
 
     sseManager.addClient(userId, res)
 
-    // Send initial connection confirmation
     res.write(`data: ${JSON.stringify({ type: 'connected', message: 'SSE connected' })}\n\n`)
 
-    // Remove client when connection closes
+    // Send a heartbeat comment every 20s to keep connection alive
+    const heartbeat = setInterval(() => {
+      res.write(': heartbeat\n\n')
+    }, 20000)
+
     req.on('close', () => {
+      clearInterval(heartbeat)
       sseManager.removeClient(userId)
+      res.end()
     })
   }
 }

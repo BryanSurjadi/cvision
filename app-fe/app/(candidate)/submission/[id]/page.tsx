@@ -235,6 +235,31 @@ export default function SubmissionDetailPage() {
             
           )}
 
+          {/* Candidate view only */}
+          {user?.role === 'candidate' && (
+            <div className='mb-2'>
+              <hr className="divider" />
+              <section>
+                <p className="section-label mb-4">Recommended Roles</p>
+                <div className="flex flex-wrap gap-2">
+                  {a.recommendedRoles?.map((role, i) => (
+                    <span
+                      key={i}
+                      className="text-xs px-3 py-1.5 rounded-md font-medium"
+                      style={{
+                        background: 'var(--brand-light)',
+                        border: '1px solid #BFDBFE',
+                        color: 'var(--brand)'
+                      }}
+                    >
+                      {role}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            </div>
+          )}
+
           {/* Score hero */}
           <div className="flex items-center gap-10 mb-12 pb-10 border-b border-[#E8E8E4]">
             <div className="relative shrink-0">

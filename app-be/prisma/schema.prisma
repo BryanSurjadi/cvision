@@ -84,6 +84,7 @@ model AnalysisResult {
   strengths           Json
   weaknesses          Json
   recommendation      String
+  recommendedRoles    Json?
   analyzedAt          DateTime        @default(now())
 
   submission Submission @relation(fields: [submissionId], references: [id])
