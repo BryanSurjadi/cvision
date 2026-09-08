@@ -19,7 +19,7 @@ export const bookmarkRepository = {
 
   findByHr: async (hrId: string) => {
     return prisma.bookmark.findMany({
-      where: { hrId }, 
+      where: { hrId, submission: { status: 'verified', candidate: { isActive: true } } },
         include: {
           submission: { 
             include: { 
@@ -35,7 +35,7 @@ export const bookmarkRepository = {
   },
 
   countByHr: async (hrId: string) => {
-    return prisma.bookmark.count({ where: { hrId } })
+    return prisma.bookmark.count({ where: { hrId, submission: { status: 'verified', candidate: { isActive: true } } } })
   }
 
-} 
+}

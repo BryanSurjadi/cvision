@@ -9,7 +9,7 @@ export const bookmarkService = {
       throw new Error('Submission not found')
     }
 
-    if (submission.status !== 'verified') {
+    if (submission.status !== 'verified' || !submission.candidate.isActive) {
       throw new Error('Can only bookmark verified candidates')
     }
 

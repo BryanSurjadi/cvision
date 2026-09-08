@@ -23,7 +23,7 @@ export const candidateService = {
     }
   },
 
-  getProfile: async (submissionId: string) => {
+  getProfile: async (submissionId: string, role: string = 'hr') => {
 
     const submission = await submissionRepository.findById(submissionId)
 
@@ -34,6 +34,7 @@ export const candidateService = {
     if (submission.status !== 'verified') {
       throw new Error('Submission is not verified')
     }
+    if (role !== 'admin' && !submission.candidate.isActive) throw new Error('Candidate is unavailable')
     
     return submission    
   }

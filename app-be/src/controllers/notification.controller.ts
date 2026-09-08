@@ -20,14 +20,18 @@ export const notificationController = {
   markAsRead: async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params as { id: string }
-      const result = await notificationService.markAsRead(id)
+      const result = await notificationService.markAsRead(id, (req as any).user.userId)
       res.status(200).json({
         success: true,
         message: 'Notification marked as read',
         data: result
       })
     } catch (error: any) {
-      res.status(400).json({ success: false, message: error.message })
+      if (error.code === 'P2025') {
+        res.status(404).json({ success: false, message: 'Notification not found' })
+        return
+      }
+      res.status(500).json({ success: false, message: 'Unable to update notification' })
     }
   },
 
@@ -57,7 +61,7 @@ export const notificationController = {
 
     req.on('close', () => {
       clearInterval(heartbeat)
-      sseManager.removeClient(userId)
+      sseManager.removeClient(userId, res)
       res.end()
     })
   }

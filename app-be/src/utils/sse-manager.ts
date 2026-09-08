@@ -1,29 +1,34 @@
 import { Response } from 'express'
 
 class SSEManager {
-  private clients: Map<string, Response> = new Map()
+  private clients = new Map<string, Set<Response>>()
 
   addClient(userId: string, res: Response) {
-    this.clients.set(userId, res)
-    console.log(`SSE client connected: ${userId}`)
+    const clients = this.clients.get(userId) ?? new Set<Response>()
+    clients.add(res)
+    this.clients.set(userId, clients)
   }
 
-  removeClient(userId: string) {
+  removeClient(userId: string, res: Response) {
+    const clients = this.clients.get(userId)
+    clients?.delete(res)
+    if (clients?.size === 0) this.clients.delete(userId)
+  }
+
+  disconnectUser(userId: string) {
+    const clients = this.clients.get(userId)
     this.clients.delete(userId)
-    console.log(`SSE client disconnected: ${userId}`)
+    clients?.forEach(client => client.end())
   }
 
   emit(userId: string, data: object) {
-    const client = this.clients.get(userId)
-    if (client) {
+    this.clients.get(userId)?.forEach(client => {
       client.write(`data: ${JSON.stringify(data)}\n\n`)
-    }
+    })
   }
 
   emitToAll(data: object) {
-    this.clients.forEach((client) => {
-      client.write(`data: ${JSON.stringify(data)}\n\n`)
-    })
+    this.clients.forEach((_clients, userId) => this.emit(userId, data))
   }
 }
 

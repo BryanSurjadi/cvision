@@ -3,10 +3,11 @@ import { submissionController } from "../controllers/submission.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { authorize } from "../middlewares/role.middleware";
 import { upload } from "../config/multer";
+import { uploadIpLimiter, analysisQuota } from '../middlewares/rate-limit.middleware'
 
 const router = Router();
 
-router.post('/', authenticate, authorize('candidate'), upload.single('cv'), submissionController.submit);
+router.post('/', authenticate, authorize('candidate'), uploadIpLimiter, analysisQuota, upload.single('cv'), submissionController.submit);
 router.post('/mine', authenticate, authorize('candidate'), submissionController.getMine);
 router.post('/pending', authenticate, authorize('admin'), submissionController.getPending);
 router.post('/:id', authenticate, authorize('admin','candidate','hr'), submissionController.getById);

@@ -7,8 +7,8 @@ export const notificationService = {
     return notificationRepository.findByUser(userId)
   },
 
-  markAsRead: async (id: string) => {
-    return notificationRepository.markAsRead(id)
+  markAsRead: async (id: string, userId: string) => {
+    return notificationRepository.markAsRead(id, userId)
   },
 
   getUnreadCount: async (userId: string) => {

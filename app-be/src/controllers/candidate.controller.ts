@@ -33,7 +33,7 @@ export const candidateController = {
   getProfile: async (req: Request, res: Response): Promise<void> => {
     try {
       const { submissionId } = req.params as { submissionId: string }
-      const result = await candidateService.getProfile(submissionId)
+      const result = await candidateService.getProfile(submissionId, (req as any).user.role)
       res.status(200).json({ success: true, message: 'Candidate profile fetched successfully', data: result })
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message })
@@ -43,7 +43,7 @@ export const candidateController = {
   downloadCv: async (req: Request, res: Response): Promise<void> => {
   try {
     const { submissionId } = req.params as { submissionId: string }
-    const submission = await candidateService.getProfile(submissionId)
+    const submission = await candidateService.getProfile(submissionId, (req as any).user.role)
     const path = require('path')
     const fs = require('fs')
     const filePath = path.resolve(submission.cvPath)

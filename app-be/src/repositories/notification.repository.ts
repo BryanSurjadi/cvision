@@ -18,9 +18,9 @@ export const notificationRepository = {
     })
   },
 
-  markAsRead: async (id: string) => {
+  markAsRead: async (id: string, userId: string) => {
     return prisma.notification.update({
-      where: { id },
+      where: { id, userId },
       data: { isRead: true }
     })
   },

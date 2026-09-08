@@ -71,6 +71,9 @@ export const submissionService = {
     if (role === 'candidate' && submission.candidateId !== userId) {
       throw new Error('Forbidden')
     }
+    if (role === 'hr' && (submission.status !== 'verified' || !submission.candidate.isActive)) {
+      throw new Error('Forbidden')
+    }
 
     return submission
   },

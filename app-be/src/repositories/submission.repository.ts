@@ -16,7 +16,7 @@ export const submissionRepository = {
     return prisma.submission.findUnique({
       where: { id },
       include: { analysisResult: true, candidate: {
-        select: { id: true, name: true, email: true }
+        select: { id: true, name: true, email: true, isActive: true }
       }}
     })
   },
@@ -68,7 +68,7 @@ export const submissionRepository = {
     const { role, minScore, maxScore, experienceLevel, page, limit } = filters
     const skip = (page - 1) * limit
 
-    const where: any = { status: 'verified' }
+    const where: any = { status: 'verified', candidate: { isActive: true } }
 
     if (role) {
       where.targetRole = { contains: role, mode: 'insensitive' }

@@ -2,6 +2,7 @@ import { decapsulate } from "node:crypto";
 import { userRepository } from "../repositories/user.repository";
 import { hashPassword } from "../utils/bcrypt";
 import { Role } from "@prisma/client";
+import { sseManager } from '../utils/sse-manager'
 
 export const userService = {
   getAll: async () => {
@@ -37,7 +38,9 @@ export const userService = {
     if (!user) {
       throw new Error('User not found')
     }
-    return userRepository.deactivate(id)
+    const updated = await userRepository.deactivate(id)
+    sseManager.disconnectUser(id)
+    return updated
   },
 
   reactivate: async (id: string) => {
